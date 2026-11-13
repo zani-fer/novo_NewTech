@@ -827,3 +827,130 @@ tr:hover {
     }
 
 }
+
+
+/* =====================================
+   AJUSTE DO CABEÇALHO PARA CELULAR
+===================================== */
+
+@media (max-width: 768px) {
+
+    header {
+        padding: 12px 10px !important;
+    }
+
+    .header-top {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "logo usuario"
+            "menu menu";
+        align-items: center;
+        gap: 12px 8px;
+        width: 100%;
+    }
+
+    /* LOGO */
+
+    .logo-container {
+        grid-area: logo;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .logo-img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+
+    .logo-textos {
+        min-width: 0;
+    }
+
+    .logo-textos h1 {
+        font-size: 21px;
+        margin: 0 0 3px;
+    }
+
+    .logo-textos p {
+        font-size: 9px;
+        line-height: 1.4;
+        margin: 2px 0;
+    }
+
+    .logo-textos .autores {
+        font-size: 8px;
+    }
+
+    /* USUÁRIO */
+
+    .user-info {
+        grid-area: usuario;
+        position: static !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 11px;
+        white-space: normal;
+        text-align: center;
+        max-width: 85px;
+    }
+
+    /* MENU */
+
+    nav.main-nav {
+        grid-area: menu;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        width: 100% !important;
+        padding: 5px 0 !important;
+        margin: 0;
+    }
+
+    nav.main-nav a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 13px !important;
+        padding: 10px 3px !important;
+        white-space: nowrap;
+    }
+
+}
+
+/* CELULARES MENORES */
+
+@media (max-width: 380px) {
+
+    .logo-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .logo-textos h1 {
+        font-size: 18px;
+    }
+
+    .logo-textos p {
+        font-size: 8px;
+    }
+
+    .user-info {
+        font-size: 10px;
+        max-width: 72px;
+    }
+
+    nav.main-nav a {
+        font-size: 11px !important;
+    }
+
+}
