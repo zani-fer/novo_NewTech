@@ -1,13 +1,7 @@
-
-// =====================================
-// NEWTECH - SCRIPT.JS
-// =====================================
-
-// Espera a página carregar
 document.addEventListener("DOMContentLoaded", function() {
 
     // =====================================
-    // FUNÇÕES PARA SALVAR DADOS
+    // FUNÇÕES AUXILIARES
     // =====================================
 
     function buscarDados(nome) {
@@ -18,18 +12,25 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem(nome, JSON.stringify(dados));
     }
 
+    // Procura uma seção na página pelo texto do <h2>
+    function acharSecao(tituloTexto, classePai) {
+        let titulos = document.querySelectorAll("h2");
+        for (let i = 0; i < titulos.length; i++) {
+            if (titulos[i].textContent.trim() == tituloTexto) {
+                return titulos[i].closest(classePai);
+            }
+        }
+        return null;
+    }
+
     // =====================================
-    // LOGIN
+    // LOGIN E USUÁRIO
     // =====================================
 
     let botaoLogin = document.querySelector(".btn-login");
-
     if (botaoLogin) {
-
         botaoLogin.addEventListener("click", function(evento) {
-
             let campos = document.querySelectorAll(".login-box input");
-
             let usuario = campos[0].value;
             let senha = campos[1].value;
 
@@ -39,46 +40,31 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 localStorage.setItem("newtechUsuario", usuario);
             }
-
         });
     }
 
-    // Mostrar o nome do usuário
-
+    // Mostrar nome do usuário
     let nomeUsuario = localStorage.getItem("newtechUsuario");
-    let usuario = document.querySelector(".user-info");
-
-    if (nomeUsuario && usuario) {
-        usuario.textContent = "Olá, " + nomeUsuario;
+    let infoUsuario = document.querySelector(".user-info");
+    if (nomeUsuario && infoUsuario) {
+        infoUsuario.textContent = "Olá, " + nomeUsuario;
     }
 
     // Mostrar e esconder senha
-
     let olho = document.querySelector(".password-toggle");
-
     if (olho) {
-
         olho.addEventListener("click", function() {
-
-            let senha = document.querySelector('.login-box input[type="password"]');
-
-            if (senha) {
-                senha.type = "text";
+            let campoSenha = document.querySelectorAll(".login-box input")[1];
+            if (campoSenha.type == "password") {
+                campoSenha.type = "text";
             } else {
-                senha = document.querySelector('.login-box input[type="text"]:nth-of-type(2)');
-
-                if (senha) {
-                    senha.type = "password";
-                }
+                campoSenha.type = "password";
             }
-
         });
     }
 
     // Esqueci minha senha
-
     let esqueci = document.querySelector(".forgot");
-
     if (esqueci) {
         esqueci.addEventListener("click", function(evento) {
             evento.preventDefault();
@@ -90,75 +76,49 @@ document.addEventListener("DOMContentLoaded", function() {
     // CADASTRAR EQUIPAMENTOS
     // =====================================
 
-    let tituloCadastro = Array.from(document.querySelectorAll("h2")).find(function(item) {
-        return item.textContent.trim() == "Cadastrar Equipamento";
-    });
+    let caixaCadastro = acharSecao("Cadastrar Equipamento", ".form-box");
+    if (caixaCadastro) {
+        let botao = caixaCadastro.querySelector("a.btn");
 
-    if (tituloCadastro) {
+        botao.addEventListener("click", function(evento) {
+            evento.preventDefault();
 
-        let caixa = tituloCadastro.closest(".form-box");
+            let campos = caixaCadastro.querySelectorAll('input[type="text"]');
+            let selecoes = caixaCadastro.querySelectorAll("select");
+            let descricao = caixaCadastro.querySelector("textarea");
 
-        if (caixa) {
+            let nome = campos[0].value;
+            let patrimonio = campos[1].value;
+            let local = selecoes[0].value;
+            let categoria = selecoes[1].value;
 
-            let campos = caixa.querySelectorAll('input[type="text"]');
-            let selecoes = caixa.querySelectorAll("select");
-            let descricao = caixa.querySelector("textarea");
-            let botao = caixa.querySelector("a.btn");
-
-            if (botao) {
-
-                botao.addEventListener("click", function(evento) {
-
-                    evento.preventDefault();
-
-                    let nome = campos[0].value;
-                    let patrimonio = campos[1].value;
-                    let local = selecoes[0].value;
-                    let categoria = selecoes[1].value;
-
-                    if (nome == "" || patrimonio == "" ||
-                        local.includes("Selecione") ||
-                        categoria.includes("Selecione")) {
-
-                        alert("Preencha todos os campos!");
-                        return;
-                    }
-
-                    let equipamentos = buscarDados("newtechEquipamentos");
-
-                    let repetido = false;
-
-                    for (let i = 0; i < equipamentos.length; i++) {
-                        if (equipamentos[i].patrimonio == patrimonio) {
-                            repetido = true;
-                        }
-                    }
-
-                    if (repetido) {
-                        alert("Esse patrimônio já está cadastrado!");
-                        return;
-                    }
-
-                    let equipamento = {
-                        nome: nome,
-                        patrimonio: patrimonio,
-                        local: local,
-                        categoria: categoria,
-                        descricao: descricao ? descricao.value : "",
-                        status: "Operacional"
-                    };
-
-                    equipamentos.push(equipamento);
-
-                    salvarDados("newtechEquipamentos", equipamentos);
-
-                    alert("Equipamento cadastrado com sucesso!");
-
-                    window.location.href = "equipamentos.html";
-
-                });
+            if (nome == "" || patrimonio == "" || local.includes("Selecione") || categoria.includes("Selecione")) {
+                alert("Preencha todos os campos!");
+                return;
             }
-        }
+
+            let equipamentos = buscarDados("newtechEquipamentos");
+
+            for (let i = 0; i < equipamentos.length; i++) {
+                if (equipamentos[i].patrimonio == patrimonio) {
+                    alert("Esse patrimônio já está cadastrado!");
+                    return;
+                }
+            }
+
+            equipamentos.push({
+                nome: nome,
+                patrimonio: patrimonio,
+                local: local,
+                categoria: categoria,
+                descricao: descricao ? descricao.value : "",
+                status: "Operacional"
+            });
+
+            salvarDados("newtechEquipamentos", equipamentos);
+            alert("Equipamento cadastrado com sucesso!");
+            window.location.href = "equipamentos.html";
+        });
     }
 
     // =====================================
@@ -169,39 +129,24 @@ document.addEventListener("DOMContentLoaded", function() {
     let pesquisaEquipamento = document.querySelector(".input-busca");
 
     if (tabela && pesquisaEquipamento) {
-
         let equipamentos = buscarDados("newtechEquipamentos");
 
         for (let i = 0; i < equipamentos.length; i++) {
-
             let linha = tabela.insertRow();
-
             linha.insertCell().textContent = equipamentos[i].patrimonio;
             linha.insertCell().textContent = equipamentos[i].nome;
             linha.insertCell().textContent = equipamentos[i].local;
             linha.insertCell().textContent = equipamentos[i].status;
-
         }
 
-        // Pesquisar equipamentos
-
         pesquisaEquipamento.addEventListener("input", function() {
-
             let texto = pesquisaEquipamento.value.toLowerCase();
             let linhas = tabela.querySelectorAll("tr");
 
             for (let i = 1; i < linhas.length; i++) {
-
                 let conteudo = linhas[i].textContent.toLowerCase();
-
-                if (conteudo.includes(texto)) {
-                    linhas[i].style.display = "";
-                } else {
-                    linhas[i].style.display = "none";
-                }
-
+                linhas[i].style.display = conteudo.includes(texto) ? "" : "none";
             }
-
         });
     }
 
@@ -210,78 +155,33 @@ document.addEventListener("DOMContentLoaded", function() {
     // =====================================
 
     let caixaBusca = document.querySelector(".container-center .form-box");
-
     if (caixaBusca) {
-
         let campoBusca = caixaBusca.querySelector("input");
         let botaoBusca = caixaBusca.querySelector("a.btn");
 
         function pesquisar() {
-
             let texto = campoBusca.value.toLowerCase();
-
             if (texto == "") {
                 alert("Digite algo para pesquisar!");
                 return;
             }
 
-            let resultados = [];
-
-            // Equipamentos já existentes
-
-            let equipamentos = [
-                "Impressora 3D",
-                "Torno CNC 02",
-                "Computador LAB 01",
-                "Computador LAB 02",
-                "Furadeira de Bancada 01",
-                "Compressor de Ar 01",
-                "Torno Mecânico 01",
-                "Máquina de Solda"
+            // Junta itens fixos + equipamentos cadastrados
+            let listaCompleta = [
+                "Impressora 3D", "Torno CNC 02", "Computador LAB 01", "Computador LAB 02",
+                "Furadeira de Bancada 01", "Compressor de Ar 01", "Torno Mecânico 01", "Máquina de Solda",
+                "OS-00048 Impressora 3D", "OS-00047 Torno CNC 02", "OS-00046 Computador LAB 01",
+                "OS-00045 Computador LAB 02", "OS-00044 Furadeira de Bancada 01",
+                "OS-00043 Compressor de Ar 01", "OS-00042 Torno Mecânico 01"
             ];
-
-            // Equipamentos cadastrados pelo usuário
 
             let cadastrados = buscarDados("newtechEquipamentos");
-
             for (let i = 0; i < cadastrados.length; i++) {
-                equipamentos.push(cadastrados[i].nome);
+                listaCompleta.push(cadastrados[i].nome);
             }
 
-            // Procurar equipamentos
-
-            for (let i = 0; i < equipamentos.length; i++) {
-
-                if (equipamentos[i].toLowerCase().includes(texto)) {
-                    resultados.push(equipamentos[i]);
-                }
-
-            }
-
-            // Ordens de serviço
-
-            let ordens = [
-                "OS-00048 Impressora 3D",
-                "OS-00047 Torno CNC 02",
-                "OS-00046 Computador LAB 01",
-                "OS-00045 Computador LAB 02",
-                "OS-00044 Furadeira de Bancada 01",
-                "OS-00043 Compressor de Ar 01",
-                "OS-00042 Torno Mecânico 01"
-            ];
-
-            for (let i = 0; i < ordens.length; i++) {
-
-                if (ordens[i].toLowerCase().includes(texto)) {
-                    resultados.push(ordens[i]);
-                }
-
-            }
-
-            // Mostrar resultados
-
+            // Cria ou limpa a área de resultados
             let area = document.querySelector(".resultados-busca");
-
             if (!area) {
                 area = document.createElement("div");
                 area.className = "resultados-busca";
@@ -289,22 +189,20 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             area.innerHTML = "<h3>Resultados da busca</h3>";
+            let achouAlgo = false;
 
-            if (resultados.length == 0) {
-                area.innerHTML += "<p>Nenhum resultado encontrado.</p>";
-            } else {
-
-                for (let i = 0; i < resultados.length; i++) {
-
+            for (let i = 0; i < listaCompleta.length; i++) {
+                if (listaCompleta[i].toLowerCase().includes(texto)) {
                     let item = document.createElement("p");
-                    item.textContent = resultados[i];
-
+                    item.textContent = listaCompleta[i];
                     area.appendChild(item);
-
+                    achouAlgo = true;
                 }
-
             }
 
+            if (!achouAlgo) {
+                area.innerHTML += "<p>Nenhum resultado encontrado.</p>";
+            }
         }
 
         if (botaoBusca) {
@@ -320,120 +218,78 @@ document.addEventListener("DOMContentLoaded", function() {
                 pesquisar();
             }
         });
-
     }
 
     // =====================================
     // AGENDAR MANUTENÇÃO
     // =====================================
 
-    let tituloAgendamento = Array.from(document.querySelectorAll("h2")).find(function(item) {
-        return item.textContent.trim() == "Agendar Manutenção";
-    });
+    let caixaAgendamento = acharSecao("Agendar Manutenção", ".form-box");
+    if (caixaAgendamento) {
+        let data = caixaAgendamento.querySelector('input[type="date"]');
+        let botao = caixaAgendamento.querySelector(".btn-full");
 
-    if (tituloAgendamento) {
-
-        let caixa = tituloAgendamento.closest(".form-box");
-
-        if (caixa) {
-
-            let selecoes = caixa.querySelectorAll("select");
-            let data = caixa.querySelector('input[type="date"]');
-            let horario = caixa.querySelector('input[type="time"]');
-            let duracao = caixa.querySelector('input[type="text"]');
-            let botao = caixa.querySelector(".btn-full");
-
-            // Não permitir datas anteriores a hoje
-
-            if (data) {
-
-                let hoje = new Date().toISOString().split("T")[0];
-                data.min = hoje;
-
-            }
-
-            if (botao) {
-
-                botao.addEventListener("click", function(evento) {
-
-                    evento.preventDefault();
-
-                    let tecnico = selecoes[0].value;
-                    let equipamento = selecoes[1].value;
-
-                    if (tecnico.includes("Selecione") ||
-                        equipamento.includes("Selecione") ||
-                        data.value == "" ||
-                        horario.value == "" ||
-                        duracao.value == "") {
-
-                        alert("Preencha todos os campos!");
-                        return;
-                    }
-
-                    let agendamentos = buscarDados("newtechAgendamentos");
-
-                    let agendamento = {
-                        tecnico: tecnico,
-                        equipamento: equipamento,
-                        data: data.value,
-                        horario: horario.value,
-                        duracao: duracao.value
-                    };
-
-                    agendamentos.push(agendamento);
-
-                    salvarDados("newtechAgendamentos", agendamentos);
-
-                    // Criar notificação
-
-                    let notificacoes = buscarDados("newtechNotificacoes");
-
-                    notificacoes.push(
-                        "Manutenção agendada para " + equipamento +
-                        " em " + data.value.split("-").reverse().join("/") +
-                        " às " + horario.value + "."
-                    );
-
-                    salvarDados("newtechNotificacoes", notificacoes);
-
-                    alert("Agendamento realizado com sucesso!");
-
-                    window.location.href = "notificacoes.html";
-
-                });
-            }
+        if (data) {
+            data.min = new Date().toISOString().split("T")[0];
         }
+
+        botao.addEventListener("click", function(evento) {
+            evento.preventDefault();
+
+            let selecoes = caixaAgendamento.querySelectorAll("select");
+            let horario = caixaAgendamento.querySelector('input[type="time"]');
+            let duracao = caixaAgendamento.querySelector('input[type="text"]');
+
+            let tecnico = selecoes[0].value;
+            let equipamento = selecoes[1].value;
+
+            if (tecnico.includes("Selecione") || equipamento.includes("Selecione") ||
+                data.value == "" || horario.value == "" || duracao.value == "") {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            let agendamentos = buscarDados("newtechAgendamentos");
+            agendamentos.push({
+                tecnico: tecnico,
+                equipamento: equipamento,
+                data: data.value,
+                horario: horario.value,
+                duracao: duracao.value
+            });
+            salvarDados("newtechAgendamentos", agendamentos);
+
+            let notificacoes = buscarDados("newtechNotificacoes");
+            let dataInvertida = data.value.split("-").reverse().join("/");
+            notificacoes.push("Manutenção agendada para " + equipamento + " em " + dataInvertida + " às " + horario.value + ".");
+            salvarDados("newtechNotificacoes", notificacoes);
+
+            alert("Agendamento realizado com sucesso!");
+            window.location.href = "notificacoes.html";
+        });
     }
 
     // =====================================
     // NOTIFICAÇÕES
     // =====================================
 
-    let tituloNotificacoes = Array.from(document.querySelectorAll("h2")).find(function(item) {
-        return item.textContent.trim() == "Notificações";
-    });
-
-    if (tituloNotificacoes) {
-
-        let container = tituloNotificacoes.closest(".container");
+    let containerNotificacoes = acharSecao("Notificações", ".container");
+    if (containerNotificacoes) {
         let notificacoes = buscarDados("newtechNotificacoes");
 
         for (let i = 0; i < notificacoes.length; i++) {
-
             let aviso = document.createElement("div");
             let texto = document.createElement("p");
 
             texto.textContent = notificacoes[i];
-
             aviso.appendChild(texto);
+
             aviso.style.backgroundColor = "white";
             aviso.style.padding = "15px";
             aviso.style.marginTop = "10px";
             aviso.style.borderRadius = "8px";
 
-            container.appendChild(aviso);
-
+            containerNotificacoes.appendChild(aviso);
         }
     }
 
@@ -441,21 +297,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // PAINEL GERAL
     // =====================================
 
-    let tituloPainel = Array.from(document.querySelectorAll("h2")).find(function(item) {
-        return item.textContent.trim() == "Painel Geral";
-    });
-
-    if (tituloPainel) {
-
+    let painel = acharSecao("Painel Geral", ".container");
+    if (painel) {
         let cards = document.querySelectorAll(".grid-cards .card h3");
         let equipamentos = buscarDados("newtechEquipamentos");
 
         if (cards.length > 0) {
-
-            let quantidade = Number(cards[0].textContent);
-
-            cards[0].textContent = quantidade + equipamentos.length;
-
+            cards[0].textContent = Number(cards[0].textContent) + equipamentos.length;
         }
     }
 
